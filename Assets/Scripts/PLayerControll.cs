@@ -15,28 +15,17 @@ public class PlayerMovement : MonoBehaviour
 
     void Update()
     {
-        // Horizontal Movement
-        float moveHorizontal = Input.GetAxis("Horizontal");
-        Vector2 movement = new Vector2(moveHorizontal, 0);
-
-        // Prevent vertical movement (up and down) using W and S buttons
-        if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.S))
-        {
-            movement.y = 0;
-        }
-
         // Jumping
         if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
         {
-            
-            rb.velocity = new Vector2(rb.velocity.y, jumpForce);
+            rb.velocity = new Vector2(rb.velocity.x, jumpForce);
             isGrounded = false;
         }
     }
 
     void FixedUpdate()
     {
-        // Apply horizontal movement
+        // Horizontal Movement
         float moveHorizontal = Input.GetAxis("Horizontal");
         rb.velocity = new Vector2(moveHorizontal * moveSpeed, rb.velocity.y);
     }
@@ -47,6 +36,24 @@ public class PlayerMovement : MonoBehaviour
         if (collision.gameObject.CompareTag("Ground"))
         {
             isGrounded = true;
+        }
+    }
+
+    void OnCollisionStay2D(Collision2D collision)
+    {
+        // Ensure the character stays grounded while colliding with the ground
+        if (collision.gameObject.CompareTag("Ground"))
+        {
+            isGrounded = true;
+        }
+    }
+
+    void OnCollisionExit2D(Collision2D collision)
+    {
+        // Update the grounded flag when leaving the ground
+        if (collision.gameObject.CompareTag("Ground"))
+        {
+            isGrounded = false;
         }
     }
 }
