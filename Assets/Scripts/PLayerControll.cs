@@ -30,9 +30,9 @@ public class PlayerMovement : MonoBehaviour
         rb.velocity = new Vector2(moveHorizontal * moveSpeed, rb.velocity.y);
     }
 
+    // Trigger-based ground detection
     void OnCollisionEnter2D(Collision2D collision)
     {
-        // Check if the character is grounded
         if (collision.gameObject.CompareTag("Ground"))
         {
             isGrounded = true;
@@ -41,7 +41,6 @@ public class PlayerMovement : MonoBehaviour
 
     void OnCollisionStay2D(Collision2D collision)
     {
-        // Ensure the character stays grounded while colliding with the ground
         if (collision.gameObject.CompareTag("Ground"))
         {
             isGrounded = true;
@@ -50,7 +49,6 @@ public class PlayerMovement : MonoBehaviour
 
     void OnCollisionExit2D(Collision2D collision)
     {
-        // Update the grounded flag when leaving the ground
         if (collision.gameObject.CompareTag("Ground"))
         {
             isGrounded = false;
