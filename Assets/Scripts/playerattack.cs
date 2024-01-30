@@ -6,29 +6,34 @@ public class PlayerAttack : MonoBehaviour
     public float attackRange = 2f;
     public int attackDamage = 20;
     public LayerMask enemyLayer;
-    public Collider attackHitbox;  // Reference to the attack hitbox Collider
+    public GameObject attackHitbox; // Reference to the attack hitbox GameObject
+    public Animator animator;
 
-    private Animator animator;
+    private bool isAttacking = false;
 
     void Start()
     {
-        animator = GetComponent<Animator>();
-
         if (attackHitbox == null)
         {
             Debug.LogError("Attack hitbox not assigned!");
         }
 
+        if (animator == null)
+        {
+            animator = GetComponent<Animator>();
+        }
+
         // Disable the attack hitbox initially
         if (attackHitbox != null)
         {
-            attackHitbox.enabled = false;
+            attackHitbox.SetActive(false);
         }
     }
 
     void Update()
     {
-        if (Input.GetKeyDown(attackKey))
+        // Check for attack input only if the player is not currently attacking
+        if (!isAttacking && Input.GetKeyDown(attackKey))
         {
             Attack();
         }
@@ -45,7 +50,7 @@ public class PlayerAttack : MonoBehaviour
         // Enable the attack hitbox when attacking
         if (attackHitbox != null)
         {
-            attackHitbox.enabled = true;
+            attackHitbox.SetActive(true);
 
             // Perform attack logic
             Collider[] hitEnemies = Physics.OverlapSphere(transform.position, attackRange, enemyLayer);
@@ -61,15 +66,24 @@ public class PlayerAttack : MonoBehaviour
                 }
             }
         }
+
+        // Set a flag to prevent continuous attacks
+        isAttacking = true;
+
+        // Invoke a method to disable the hitbox after a delay (adjust as needed)
+        Invoke("DisableHitbox", 0.5f);
     }
 
     void DisableHitbox()
     {
-        // Disable the attack hitbox when not attacking
+        // Disable the attack hitbox
         if (attackHitbox != null)
         {
-            attackHitbox.enabled = false;
+            attackHitbox.SetActive(false);
         }
+
+        // Reset the attacking flag after the hitbox is disabled
+        isAttacking = false;
     }
 
     void OnDrawGizmosSelected()
