@@ -2,12 +2,26 @@ using UnityEngine;
 
 public class Hitbox : MonoBehaviour
 {
-    private void OnTriggerEnter2D(Collider2D collision)
+    // Animation event method to enable the hitbox
+    public void EnableHitbox()
     {
-        if (collision.CompareTag("Enemy"))
+        gameObject.SetActive(true); // Enable the punch collider
+    }
+
+    // Animation event method to disable the hitbox
+    public void DisableHitbox()
+    {
+        gameObject.SetActive(false); // Disable the punch collider
+    }
+
+    // Called when the character's punch collider overlaps with another collider (trigger)
+    private void OnTriggerEnter(Collider other)
+    {
+        // Check if the collider belongs to an enemy
+        if (other.CompareTag("Enemy"))
         {
-            // Damage or destroy the enemy.
-            Destroy(collision.gameObject);
+            // Destroy the enemy GameObject
+            Destroy(other.gameObject);
         }
     }
 }

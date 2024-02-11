@@ -1,72 +1,63 @@
 using UnityEngine;
-using UnityEngine.AI;
 
 public class EnemyAI : MonoBehaviour
 {
-    public float detectionRange = 10f;
-    public float attackRange = 2f;
-    public LayerMask playerLayer;
+    public Transform player; // Reference to the player's transform
+    public float moveSpeed = 3f; // Speed at which the enemy moves
+    public LayerMask groundLayer; // Layer mask for detecting ground
 
-    private Transform player;
-    private NavMeshAgent navMeshAgent;
+    private Rigidbody2D rb; // Reference to the Rigidbody2D component
+    private Vector2 movementDirection; // Direction of movement for the enemy
+    private bool isFacingRight = false; // Flag to track the direction the enemy is facing
 
     void Start()
     {
-        player = GameObject.FindGameObjectWithTag("Player").transform;
-
-        if (player == null)
-        {
-            Debug.LogError("Player not found!");
-        }
-
-        navMeshAgent = GetComponent<NavMeshAgent>();
-
-        if (navMeshAgent == null)
-        {
-            Debug.LogError("NavMeshAgent component not found!");
-        }
+        rb = GetComponent<Rigidbody2D>();
+        isFacingRight = false; // Set initial facing direction to left
     }
 
     void Update()
     {
-        if (player != null && navMeshAgent != null)
+        // Calculate direction towards the player
+        movementDirection = (player.position - transform.position).normalized;
+        // Ignore vertical movement
+        movementDirection.y = 0f;
+
+        // Check for obstacles (ground) in the movement direction
+        RaycastHit2D hit = Physics2D.Raycast(transform.position, movementDirection, Mathf.Infinity, groundLayer);
+
+        if (hit.collider != null)
         {
-            float distanceToPlayer = Vector3.Distance(transform.position, player.position);
+            // Calculate the perpendicular direction
+            Vector2 perpendicularDirection = Vector2.Perpendicular(hit.normal).normalized;
 
-            // Check if the player is within detection range
-            if (distanceToPlayer <= detectionRange)
-            {
-                // Chase the player
-                ChasePlayer();
-            }
-            else
-            {
-                // Stop chasing and return to the starting position or perform other idle behavior
-                StopChasing();
-            }
+            // Calculate the new movement direction
+            movementDirection = (movementDirection + perpendicularDirection * 0.5f).normalized;
+        }
 
-            // Check if the player is within attack range
-            if (distanceToPlayer <= attackRange)
-            {
-                // Attack the player (you can implement your attack logic here)
-                AttackPlayer();
-            }
+        // Flip the enemy sprite if changing direction
+        if ((movementDirection.x > 0 && !isFacingRight) || (movementDirection.x < 0 && isFacingRight))
+        {
+            FlipCharacter();
         }
     }
 
-    void ChasePlayer()
+    void FixedUpdate()
     {
-        navMeshAgent.SetDestination(player.position);
+        // Move the enemy in the calculated direction
+        rb.velocity = movementDirection * moveSpeed;
     }
 
-    void StopChasing()
-    {
-        navMeshAgent.ResetPath();
-    }
+  void FlipCharacter()
+{
+    // Set the facing direction based on the movement direction
+    isFacingRight = movementDirection.x >= 0;
 
-    void AttackPlayer()
-    {
-        // Implement your attack logic here
-        Debug.Log("Attacking Player!");
-    }
+    // Flip the character's scale along the X-axis
+    Vector3 newScale = transform.localScale;
+    newScale.x = isFacingRight ? Mathf.Abs(newScale.x) : -Mathf.Abs(newScale.x);
+    transform.localScale = newScale;
+}
+
+
 }
