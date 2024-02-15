@@ -4,7 +4,6 @@ public class PlayerMovement : MonoBehaviour
 {
     public float moveSpeed = 5f; // Speed at which the character moves horizontally
     public float jumpForce = 10f; // Force applied when jumping
-    bool isGrounded; // Flag to check if the character is grounded
     public Animator animator; // Reference to the Animator component
 
     Rigidbody2D rb; // Reference to the Rigidbody2D component
@@ -21,12 +20,6 @@ public class PlayerMovement : MonoBehaviour
         // Horizontal Movement
         float moveHorizontal = Input.GetAxis("Horizontal");
         Vector2 movement = new Vector2(moveHorizontal, 0);
-
-        // Prevent vertical movement (up and down) using W and S buttons
-        if (Input.GetKey(KeyCode.W) || Input.GetKey(KeyCode.S))
-        {
-            movement.y = 0;
-        }
 
         // Flip the character based on movement direction
         FlipCharacter(moveHorizontal);
@@ -47,10 +40,12 @@ public class PlayerMovement : MonoBehaviour
         }
 
         // Jumping
-        if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
+        if (Input.GetKeyDown(KeyCode.Space))
         {
             rb.velocity = new Vector2(rb.velocity.y, jumpForce);
-            isGrounded = false;
+
+            // Trigger the 'Jump' animation
+            animator.SetTrigger("Jump");
         }
     }
 
@@ -59,15 +54,6 @@ public class PlayerMovement : MonoBehaviour
         // Apply horizontal movement
         float moveHorizontal = Input.GetAxis("Horizontal");
         rb.velocity = new Vector2(moveHorizontal * moveSpeed, rb.velocity.y);
-    }
-
-    void OnCollisionEnter2D(Collision2D collision)
-    {
-        // Check if the character is grounded
-        if (collision.gameObject.CompareTag("Ground"))
-        {
-            isGrounded = true;
-        }
     }
 
     void FlipCharacter(float horizontal)
