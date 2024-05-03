@@ -6,6 +6,7 @@ public class EnemyAI : MonoBehaviour
     public float moveSpeed = 3f; // Speed at which the enemy moves
     public LayerMask groundLayer; // Layer mask for detecting ground
     public float detectionRadius = 5f; // Detection radius for detecting the player
+    public int damageAmount = 10; // Amount of damage the enemy deals to the player
 
     private Rigidbody2D rb; // Reference to the Rigidbody2D component
     private Animator animator; // Reference to the Animator component
@@ -71,6 +72,18 @@ public class EnemyAI : MonoBehaviour
 
         // Move the enemy in the calculated direction
         rb.velocity = movementDirection * moveSpeed;
+    }
+
+    void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.CompareTag("Player"))
+        {
+            Health playerHealth = other.GetComponent<Health>();
+            if (playerHealth != null)
+            {
+                playerHealth.TakeDamage(damageAmount);
+            }
+        }
     }
 
     void OnDrawGizmosSelected()

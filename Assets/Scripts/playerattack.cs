@@ -2,79 +2,65 @@ using UnityEngine;
 
 public class PlayerAttack : MonoBehaviour
 {
-    public KeyCode attackKey = KeyCode.Space;
-    public float attackRange = 2f;
-    public int attackDamage = 20;
-    public LayerMask enemyLayer;
-    public Transform attackPoint; // Reference to the attack point transform
-    public Animator animator;
+    private Animator anim;
+    public float attackTime;
+    public float startTimeAttack;
 
-    private bool isAttacking = false;
+    public KeyCode attackKey = KeyCode.Space; // Attack key
+    public Transform attackLocation;
+    public float attackRange;
+    public LayerMask enemies;
+    public int damageAmount = 20; // Amount of damage dealt to enemies
 
-    void Start()
+    public AudioSource attackAudioSource; // Reference to the AudioSource component for attack sound
+
+    private void Start()
     {
-        if (attackPoint == null)
-        {
-            Debug.LogError("Attack point not assigned!");
-        }
-
-        if (animator == null)
-        {
-            animator = GetComponent<Animator>();
-        }
+        anim = GetComponent<Animator>();
     }
 
     void Update()
     {
-        // Check for attack input only if the player is not currently attacking
-        if (!isAttacking && Input.GetKeyDown(attackKey))
+        if (attackTime <= 0)
         {
-            Attack();
+            if (Input.GetKeyDown(attackKey)) // Check if attack key is pressed
+            {
+                Attack();
+            }
+        }
+        else
+        {
+            attackTime -= Time.deltaTime;
         }
     }
 
     void Attack()
-{
-    // Trigger the attack animation
-    if (animator != null)
     {
-        animator.SetTrigger("Attack");
-    }
+        anim.SetTrigger("Attack"); // Trigger attack animation
 
-    // Perform attack logic
-    Collider2D[] hitEnemies = Physics2D.OverlapCircleAll(attackPoint.position, attackRange, enemyLayer);
-
-    foreach (Collider2D enemy in hitEnemies)
-    {
-        // Check if the collided object has a Health component
-        Health enemyHealth = enemy.GetComponent<Health>();
-        if (enemyHealth != null)
+        // Play attack sound effect if AudioSource is assigned
+        if (attackAudioSource != null)
         {
-            // Deal damage to the enemy
-            enemyHealth.TakeDamage(attackDamage);
-
-            // Log a debug message indicating that the enemy was hit
-            Debug.Log("We hit " + enemy.name);
+            attackAudioSource.Play();
         }
+
+        Collider2D[] damage = Physics2D.OverlapCircleAll(attackLocation.position, attackRange, enemies);
+
+        for (int i = 0; i < damage.Length; i++)
+        {
+            EnemyHealth enemyHealth = damage[i].GetComponent<EnemyHealth>(); // Get enemy health component
+            if (enemyHealth != null)
+            {
+                enemyHealth.TakeDamage(damageAmount); // Deal damage to enemy
+            }
+        }
+
+        attackTime = startTimeAttack; // Reset attack cooldown
     }
 
-    // Set a flag to prevent continuous attacks
-    isAttacking = true;
-
-    // Invoke a method to reset the attacking flag after a delay (adjust as needed)
-    Invoke("ResetAttackFlag", 0.5f);
-}
-
-    void ResetAttackFlag()
+    private void OnDrawGizmosSelected()
     {
-        // Reset the attacking flag
-        isAttacking = false;
-    }
-
-    void OnDrawGizmosSelected()
-    {
-        // Draw a visual representation of the attack range in the Scene view
         Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(attackPoint.position, attackRange);
+        Gizmos.DrawWireSphere(attackLocation.position, attackRange);
     }
 }
