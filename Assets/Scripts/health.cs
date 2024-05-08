@@ -3,10 +3,10 @@ using System.Collections;
 
 public class Health : MonoBehaviour
 {
-    public int maxHealth = 100;
-    private int currentHealth;
-    public AudioSource damageAudioSource;
-    public AudioSource deathAudioSource;
+    public int maxHealth = 100; 
+    private int currentHealth; 
+    public AudioSource damageAudioSource; 
+    public AudioSource deathAudioSource; 
     public Animator animator;
 
     public delegate void HealthChangeDelegate(int currentHealth, int maxHealth);
@@ -14,17 +14,17 @@ public class Health : MonoBehaviour
     public delegate void DeathDelegate();
     public static event DeathDelegate OnDeath;
     public delegate void PlayerDeathDelegate();
-    public static event PlayerDeathDelegate OnPlayerDeath;
+    public static event PlayerDeathDelegate OnPlayerDeath; 
 
     void Start()
     {
-        currentHealth = maxHealth;
-        UpdateHealthBar();
+        currentHealth = maxHealth; 
+        UpdateHealthBar(); 
     }
 
     public void TakeDamage(int damageAmount)
     {
-        currentHealth -= damageAmount;
+        currentHealth -= damageAmount; 
 
         if (animator != null)
         {
@@ -40,8 +40,8 @@ public class Health : MonoBehaviour
 
         if (currentHealth <= 0)
         {
-            currentHealth = 0;
-            Die();
+            currentHealth = 0; 
+            Die(); 
         }
 
         Debug.Log("Player took " + damageAmount + " damage. Current Health: " + currentHealth);
@@ -56,29 +56,32 @@ public class Health : MonoBehaviour
     {
         if (deathAudioSource != null)
         {
-            deathAudioSource.Play();
+            deathAudioSource.Play(); // Play the death sound effect
         }
 
         Debug.Log("Player has died.");
 
+        if (animator != null)
+        {
+            animator.SetTrigger("Die");
+        }
+
         OnDeath?.Invoke();
         OnPlayerDeath?.Invoke();
 
-        StartCoroutine(RestartAfterDelay(5f)); // Restart after 2 seconds
+        StartCoroutine(RestartAfterDelay(2f)); // Restart after 2 seconds
     }
 
     IEnumerator RestartAfterDelay(float delay)
     {
         yield return new WaitForSeconds(delay);
-
-        // Restart logic
-        // For demonstration purposes, let's just reload the current scene
-        UnityEngine.SceneManagement.SceneManager.LoadScene(UnityEngine.SceneManagement.SceneManager.GetActiveScene().buildIndex);
+        // Restart logic goes here
+        Debug.Log("Restarting...");
     }
 
     public void RestoreHealth()
     {
-        currentHealth = maxHealth;
+        currentHealth = maxHealth; 
         OnHealthChanged?.Invoke(currentHealth, maxHealth);
         UpdateHealthBar();
     }
