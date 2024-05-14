@@ -9,7 +9,7 @@ TagManager:
   - Background
   - Enemy
   - DeathZone
-  - Endgame
+  - Finishline
   layers:
   - Default
   - TransparentFX

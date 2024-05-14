@@ -9,6 +9,9 @@ public class Health : MonoBehaviour
     public AudioSource deathAudioSource; 
     public Animator animator;
 
+    // Reference to the PlayerMovement script
+    public PlayerMovement PlayerMovement;
+
     public delegate void HealthChangeDelegate(int currentHealth, int maxHealth);
     public static event HealthChangeDelegate OnHealthChanged;
     public delegate void DeathDelegate();
@@ -20,6 +23,16 @@ public class Health : MonoBehaviour
     {
         currentHealth = maxHealth; 
         UpdateHealthBar(); 
+    }
+
+
+    void Update()
+    {
+        if (currentHealth <= 0)
+        {
+            // Disable PlayerMovement script when health reaches 0
+            PlayerMovement.enabled = false;
+        }
     }
 
     public void TakeDamage(int damageAmount)
